@@ -1,0 +1,170 @@
+# 5. Exemple Pas à Pas de l'Algorithme de Bellman-Ford
+
+Pour illustrer le fonctionnement de l'algorithme de Bellman-Ford, suivons son exécution sur un exemple de graphe.
+
+## 5.1. Définition du Graphe Exemple
+
+Considérons le graphe orienté et pondéré suivant :
+*   **Nœuds (V)** : S, A, B, C, D (Nombre de sommets |V| = 5)
+*   **Nœud Source** : S
+*   **Arêtes (E)** et leurs poids :
+    1.  (S, A, 4)
+    2.  (S, B, 2)
+    3.  (A, C, 3)
+    4.  (B, A, -1)
+    5.  (B, C, 6)
+    6.  (B, D, 3)
+    7.  (C, D, -2)
+    8.  (D, S, 1)
+
+`[DESCRIPTION ET/OU ESPACE RÉSERVÉ POUR IMAGE DU GRAPHE INITIAL ICI]`
+*(Imaginez ici un diagramme du graphe avec les nœuds S, A, B, C, D et les arêtes orientées avec leurs poids respectifs. S est le point de départ.)*
+
+L'algorithme effectuera `|V| - 1 = 5 - 1 = 4` passes de relaxation sur toutes les arêtes.
+
+## 5.2. Initialisation
+
+Conformément à l'algorithme, nous initialisons les distances et les prédécesseurs :
+*   La distance du nœud source `S` à lui-même est 0.
+*   Toutes les autres distances sont initialisées à l'infini (`Inf`).
+*   Tous les prédécesseurs sont initialisés à `Nul`.
+
+**État initial :**
+`Distances: {S:0, A:Inf, B:Inf, C:Inf, D:Inf}`
+`Prédécesseurs: {S:Nul, A:Nul, B:Nul, C:Nul, D:Nul}`
+
+`[TABLEAU DES DISTANCES ET PRÉDÉCESSEURS APRÈS INITIALISATION ICI]`
+(Le tableau ci-dessus représente cet état)
+
+## 5.3. Tracé des Itérations (`V-1` passes)
+
+Nous allons maintenant effectuer 4 passes, en considérant les arêtes dans l'ordre où elles ont été listées ci-dessus.
+
+---
+**Passe 1 :**
+
+Arêtes considérées (dans cet ordre) :
+1.  **(S, A, 4)** : `dist[S] + 4 = 0 + 4 = 4`. `4 < dist[A]=Inf`.
+    *   MàJ : `dist[A] = 4`, `pred[A] = S`.
+2.  **(S, B, 2)** : `dist[S] + 2 = 0 + 2 = 2`. `2 < dist[B]=Inf`.
+    *   MàJ : `dist[B] = 2`, `pred[B] = S`.
+3.  **(A, C, 3)** : `dist[A] + 3 = 4 + 3 = 7`. `7 < dist[C]=Inf`.
+    *   MàJ : `dist[C] = 7`, `pred[C] = A`.
+4.  **(B, A, -1)** : `dist[B] + (-1) = 2 - 1 = 1`. `1 < dist[A]=4`.
+    *   MàJ : `dist[A] = 1`, `pred[A] = B`.
+5.  **(B, C, 6)** : `dist[B] + 6 = 2 + 6 = 8`. `8` n'est pas `< dist[C]=7`. Pas de MàJ.
+6.  **(B, D, 3)** : `dist[B] + 3 = 2 + 3 = 5`. `5 < dist[D]=Inf`.
+    *   MàJ : `dist[D] = 5`, `pred[D] = B`.
+7.  **(C, D, -2)** : `dist[C] + (-2) = 7 - 2 = 5`. `5` n'est pas `< dist[D]=5`. Pas de MàJ. (Si l'ordre des arêtes 6 et 7 était inversé, D aurait pu être mis à jour ici, puis de nouveau par l'arête 6, illustrant que l'ordre importe pour les valeurs intermédiaires mais pas pour le résultat final après V-1 passes).
+8.  **(D, S, 1)** : `dist[D] + 1 = 5 + 1 = 6`. `6` n'est pas `< dist[S]=0`. Pas de MàJ.
+
+**État après Passe 1 :**
+`Distances: {S:0, A:1, B:2, C:7, D:5}`
+`Prédécesseurs: {S:Nul, A:B, B:S, C:A, D:B}`
+
+`[TABLEAU DES DISTANCES ET PRÉDÉCESSEURS APRÈS PASSE 1 ICI]`
+(Le tableau ci-dessus représente cet état)
+
+---
+**Passe 2 :**
+
+Arêtes considérées :
+1.  **(S, A, 4)** : `dist[S] + 4 = 0 + 4 = 4`. `4` n'est pas `< dist[A]=1`. Pas de MàJ.
+2.  **(S, B, 2)** : `dist[S] + 2 = 0 + 2 = 2`. `2` n'est pas `< dist[B]=2`. Pas de MàJ.
+3.  **(A, C, 3)** : `dist[A] + 3 = 1 + 3 = 4`. `4 < dist[C]=7`.
+    *   MàJ : `dist[C] = 4`, `pred[C] = A`.
+4.  **(B, A, -1)** : `dist[B] + (-1) = 2 - 1 = 1`. `1` n'est pas `< dist[A]=1`. Pas de MàJ.
+5.  **(B, C, 6)** : `dist[B] + 6 = 2 + 6 = 8`. `8` n'est pas `< dist[C]=4`. Pas de MàJ.
+6.  **(B, D, 3)** : `dist[B] + 3 = 2 + 3 = 5`. `5` n'est pas `< dist[D]=5`. Pas de MàJ.
+7.  **(C, D, -2)** : `dist[C] + (-2) = 4 - 2 = 2`. `2 < dist[D]=5`.
+    *   MàJ : `dist[D] = 2`, `pred[D] = C`.
+8.  **(D, S, 1)** : `dist[D] + 1 = 2 + 1 = 3`. `3` n'est pas `< dist[S]=0`. Pas de MàJ.
+
+**État après Passe 2 :**
+`Distances: {S:0, A:1, B:2, C:4, D:2}`
+`Prédécesseurs: {S:Nul, A:B, B:S, C:A, D:C}`
+
+`[TABLEAU DES DISTANCES ET PRÉDÉCESSEURS APRÈS PASSE 2 ICI]`
+(Le tableau ci-dessus représente cet état)
+
+---
+**Passe 3 :**
+
+Arêtes considérées :
+1.  **(S, A, 4)** : `dist[S] + 4 = 4`. Pas de MàJ pour `dist[A]=1`.
+2.  **(S, B, 2)** : `dist[S] + 2 = 2`. Pas de MàJ pour `dist[B]=2`.
+3.  **(A, C, 3)** : `dist[A] + 3 = 1 + 3 = 4`. Pas de MàJ pour `dist[C]=4`.
+4.  **(B, A, -1)** : `dist[B] - 1 = 1`. Pas de MàJ pour `dist[A]=1`.
+5.  **(B, C, 6)** : `dist[B] + 6 = 8`. Pas de MàJ pour `dist[C]=4`.
+6.  **(B, D, 3)** : `dist[B] + 3 = 5`. Pas de MàJ pour `dist[D]=2`.
+7.  **(C, D, -2)** : `dist[C] - 2 = 4 - 2 = 2`. Pas de MàJ pour `dist[D]=2`.
+8.  **(D, S, 1)** : `dist[D] + 1 = 2 + 1 = 3`. Pas de MàJ pour `dist[S]=0`.
+
+**État après Passe 3 :**
+Aucune mise à jour n'a eu lieu lors de la Passe 3. L'algorithme a convergé.
+`Distances: {S:0, A:1, B:2, C:4, D:2}`
+`Prédécesseurs: {S:Nul, A:B, B:S, C:A, D:C}`
+
+`[TABLEAU DES DISTANCES ET PRÉDÉCESSEURS APRÈS PASSE 3 ICI]`
+(Le tableau ci-dessus représente cet état)
+
+---
+**Passe 4 :**
+
+Étant donné qu'aucune distance n'a été mise à jour lors de la Passe 3, aucune mise à jour ne se produira non plus lors de la Passe 4. L'algorithme maintient les mêmes valeurs.
+
+**État après Passe 4 :**
+`Distances: {S:0, A:1, B:2, C:4, D:2}`
+`Prédécesseurs: {S:Nul, A:B, B:S, C:A, D:C}`
+
+`[TABLEAU DES DISTANCES ET PRÉDÉCESSEURS APRÈS PASSE 4 ICI]`
+(Le tableau ci-dessus représente cet état)
+
+---
+## 5.4. Résultat Final
+
+Après `|V|-1 = 4` passes, les tableaux finaux des distances et des prédécesseurs sont :
+
+**Distances Finales :**
+`{S:0, A:1, B:2, C:4, D:2}`
+
+**Prédécesseurs Finaux :**
+`{S:Nul, A:B, B:S, C:A, D:C}`
+
+**Détection de Cycle Négatif (Optionnel pour cet exemple) :**
+Si nous devions effectuer une 5ème passe (la `|V|`-ième passe) :
+1.  (S, A, 4): 0+4=4. !< 1.
+2.  (S, B, 2): 0+2=2. !< 2.
+3.  (A, C, 3): 1+3=4. !< 4.
+4.  (B, A, -1): 2-1=1. !< 1.
+5.  (B, C, 6): 2+6=8. !< 4.
+6.  (B, D, 3): 2+3=5. !< 2.
+7.  (C, D, -2): 4-2=2. !< 2.
+8.  (D, S, 1): 2+1=3. !< 0.
+Aucune distance n'est mise à jour, ce qui confirme l'absence de cycle de poids négatif accessible depuis S dans ce graphe.
+
+## 5.5. Reconstruction des Plus Courts Chemins
+
+Nous pouvons utiliser le tableau `Prédécesseurs` pour reconstruire les plus courts chemins de la source `S` vers n'importe quel autre nœud.
+
+*   **Chemin de S à D (coût : 2)** :
+    *   Nœud actuel : D
+    *   `pred[D] = C`. Chemin : C -> D
+    *   Nœud actuel : C
+    *   `pred[C] = A`. Chemin : A -> C -> D
+    *   Nœud actuel : A
+    *   `pred[A] = B`. Chemin : B -> A -> C -> D
+    *   Nœud actuel : B
+    *   `pred[B] = S`. Chemin : S -> B -> A -> C -> D
+    *   Nœud actuel : S. `pred[S] = Nul`. Terminé.
+    *   Chemin final inversé : **S -> B -> A -> C -> D** (Coûts : S->B(2), B->A(-1), A->C(3), C->D(-2). Total : 2 - 1 + 3 - 2 = 2)
+
+*   **Chemin de S à C (coût : 4)** :
+    *   D:C, pred[C]=A, pred[A]=B, pred[B]=S.
+    *   Chemin final inversé : **S -> B -> A -> C** (Coûts : S->B(2), B->A(-1), A->C(3). Total : 2 - 1 + 3 = 4)
+
+*   **Chemin de S à A (coût : 1)** :
+    *   D:A, pred[A]=B, pred[B]=S.
+    *   Chemin final inversé : **S -> B -> A** (Coûts : S->B(2), B->A(-1). Total : 2 - 1 = 1)
+
+Cet exemple illustre comment Bellman-Ford met à jour itérativement les distances et comment, en l'absence de cycles de poids négatif, il converge vers les coûts des plus courts chemins.
