@@ -1,0 +1,104 @@
+## 9.2. Simulation Pas à Pas de Bellman-Ford (Visualisation Statique)
+
+### Introduction
+
+Visualiser l'algorithme de Bellman-Ford étape par étape est un excellent moyen de comprendre en profondeur son fonctionnement. Cela permet de suivre concrètement comment les estimations des distances sont mises à jour itérativement à travers le graphe, comment l'information se propage depuis le nœud source, et, le cas échéant, comment un cycle de poids négatif est détecté. Cette section décrit une approche pour générer une séquence d'images statiques, chacune capturant l'état du graphe et des distances à un moment clé de l'exécution de l'algorithme.
+
+### Configuration de la Simulation
+
+Pour cette simulation, nous utiliserons un petit graphe afin de faciliter la lisibilité des visualisations.
+
+**Graphe Exemple pour la Simulation (sans cycle négatif initialement) :**
+*   **Nœuds :** A, B, C, D (Source : A)
+*   **Arêtes et poids :**
+    *   (A, B, 6)
+    *   (A, C, 7)
+    *   (B, D, 5)
+    *   (C, B, -4) // Arête avec poids négatif
+    *   (C, D, 2)
+    *   (D, C, -1) // Pourrait créer un cycle C-D-C, mais pas négatif (2-1=1)
+
+**Outils envisagés :**
+L'implémentation de cette visualisation pourrait se faire en Python, en utilisant :
+*   **NetworkX :** Pour la création, la manipulation et le stockage du graphe.
+*   **Matplotlib :** Pour le dessin du graphe, l'affichage des nœuds, des arêtes, des poids, et des distances mises à jour sur les nœuds.
+
+`[DÉBUT CODE CONFIGURATION SIMULATION BELLMAN-FORD]`
+```pseudocode
+// Pseudocode ou code Python pour la configuration :
+
+// 1. Définition du Graphe avec NetworkX
+// G = nx.DiGraph() // Créer un graphe orienté
+// G.add_nodes_from(['A', 'B', 'C', 'D'])
+// G.add_weighted_edges_from([
+//     ('A', 'B', 6), ('A', 'C', 7),
+//     ('B', 'D', 5), ('C', 'B', -4),
+//     ('C', 'D', 2), ('D', 'C', -1)
+// ])
+// source_node = 'A'
+
+// 2. Fonction de Dessin du Graphe avec Matplotlib
+// fonction dessiner_graphe_etat(G, pos, distances, iteration_label, ax):
+//     ax.clear()
+//     // Dessiner les nœuds et les arêtes (nx.draw)
+//     // Afficher les poids des arêtes (nx.draw_networkx_edge_labels)
+//     // Créer des étiquettes pour les nœuds affichant "NomDuNoeud\nDist:valeur"
+//     node_labels = {node: f"{node}\nDist:{distances.get(node, 'Inf')}" for node in G.nodes()}
+//     nx.draw_networkx_labels(G, pos, labels=node_labels, ax=ax)
+//     ax.set_title(iteration_label)
+
+// // Préparer la figure Matplotlib
+// fig, ax = plt.subplots(figsize=(8, 6))
+// node_positions = nx.spring_layout(G) // Calculer une disposition pour les nœuds
+```
+`[FIN CODE CONFIGURATION SIMULATION BELLMAN-FORD]`
+
+### Déroulement de la Simulation (Images par Étape)
+
+L'idée est d'instrumenter l'algorithme de Bellman-Ford pour qu'il appelle la fonction `dessiner_graphe_etat` après l'initialisation et après chaque passe complète de relaxation des arêtes. Pour un graphe à `|V|` sommets, cela signifie une image initiale et `|V|-1` images pour les passes de relaxation, plus une image optionnelle pour la détection de cycle. Pour notre graphe à 4 nœuds, nous aurons 1 (initiale) + 3 (passes) images.
+
+**Initialisation :**
+Image montrant l'état initial du graphe avec les distances initialisées (0 pour la source A, Infini pour B, C, D). Les poids des arêtes sont visibles.
+
+`[IMAGE : GRAPHE - ÉTAT INITIAL (DISTANCES INITIALISÉES)]`
+*(Description attendue de l'image : Graphe avec A:0, B:Inf, C:Inf, D:Inf. Arêtes et poids affichés.)*
+
+**Après Passe de Relaxation 1 :**
+Image montrant l'état du graphe après la Passe 1. Les distances mises à jour suite à la première série de relaxations sont affichées sur les nœuds. Par exemple, `dist(B)` et `dist(C)` devraient être mises à jour depuis A.
+
+`[IMAGE : GRAPHE - APRÈS PASSE 1]`
+*(Description attendue : A:0. B et C ont de nouvelles distances (ex: B:6, C:7). D est encore Inf. Les arêtes (A,B) et (A,C) pourraient être mises en évidence comme ayant été relâchées.)*
+
+**Après Passe de Relaxation 2 :**
+Image montrant l'état du graphe après la Passe 2. D'autres distances peuvent avoir été mises à jour. Par exemple, `dist(D)` pourrait être atteinte, ou `dist(B)` pourrait être améliorée via `C` si `A->C->B` est plus court.
+
+`[IMAGE : GRAPHE - APRÈS PASSE 2]`
+*(Description attendue : A:0. B pourrait être 7-4=3 via C. D pourrait être 6+5=11 via B ou 7+2=9 via C. Les distances reflètent les chemins avec au plus 2 arêtes.)*
+
+**Après Passe de Relaxation 3 (|V|-1 passes) :**
+Image montrant l'état du graphe après la Passe 3. Pour ce petit graphe, les distances finales devraient être atteintes.
+
+`[IMAGE : GRAPHE - APRÈS PASSE 3]`
+*(Description attendue : Toutes les distances finales pour un graphe sans cycle négatif. Par exemple : A:0, B:3 (A->C->B), C:7 (A->C) ou peut-être C:3-1=2 (A->C->B->D->C) ??? Non, D->C ne sera pas encore propagé à C pour réduire la distance de A à C. C devrait être 7 ou une valeur issue d'un chemin plus court si B est relaxé avant. Il faut suivre l'exemple précisément. Supposons C=7, D=9 (A->C->D) ou D=3+5=8 (A->C->B->D). Les valeurs finales seraient A:0, B:3, C:7, D:8 (A->C->B->D) ou D:9 (A->C->D). Si C->B (-4) est pris, A->C (7) -> B (3). Si D->C (-1) est pris, A->C->D (9) -> C (8) - non, car D vient de C.
+Le chemin A->C->B = 7-4 = 3. dist(B)=3.
+Le chemin A->C->D = 7+2 = 9. dist(D)=9.
+Le chemin A->C->B->D = 3+5 = 8. dist(D)=8.
+Donc: A:0, B:3, C:7, D:8.)*
+
+**Détection de Cycle Négatif (Illustration Optionnelle) :**
+Si nous avions un graphe différent avec un cycle négatif (par exemple, si l'arête (D,C) était -10 au lieu de -1, créant un cycle C-D-C de 2-10=-8), une image après la `|V|`-ième passe (Passe 4 ici) pourrait illustrer cela.
+Texte : "Si un cycle négatif est présent et détecté lors de la `|V|`-ième passe, l'image montrerait des distances qui continuent de diminuer sur les nœuds impliqués dans le cycle, ou une annotation indiquant la détection."
+
+`[IMAGE : GRAPHE - DÉTECTION DE CYCLE NÉGATIF (PASSE V)]`
+*(Description attendue : Dans un scénario de cycle négatif, les distances des nœuds C et D seraient encore plus basses qu'à la fin de la passe V-1, et une note indiquerait "Cycle Négatif Détecté".)*
+
+### Analyse de la Simulation
+
+En examinant la séquence d'images générées :
+1.  On observe comment les distances sont initialement à l'infini et diminuent progressivement à mesure que des chemins plus courts sont découverts.
+2.  On peut voir l'effet de "front d'onde" des distances se propageant depuis le nœud source.
+3.  L'impact des arêtes à poids négatif sur les distances des nœuds voisins devient apparent.
+4.  La convergence de l'algorithme est visible lorsque les distances cessent de changer de manière significative après un certain nombre de passes (typiquement avant ou à `|V|-1` passes en l'absence de cycles négatifs).
+5.  Dans le cas d'une visualisation de détection de cycle négatif, on verrait les distances des nœuds impliqués dans le cycle diminuer encore lors de la `|V|`-ième passe.
+
+Cette approche statique, bien que moins interactive qu'une animation, fournit des points de contrôle clairs pour analyser et comprendre le comportement de Bellman-Ford sur un graphe donné.

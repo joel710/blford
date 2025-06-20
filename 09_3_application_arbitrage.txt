@@ -1,0 +1,135 @@
+## 9.3. Exemple d'Application : Détection d'Arbitrage de Devises (Code)
+
+### Introduction
+
+L'une des applications les plus intéressantes de l'algorithme de Bellman-Ford, en particulier de sa capacité à détecter les cycles de poids négatif, se trouve dans le domaine financier : la détection d'opportunités d'arbitrage sur les marchés des changes.
+
+L'**arbitrage de devises** consiste à exploiter les différences de taux de change entre plusieurs devises pour réaliser un profit sans risque. On cherche une séquence de conversions de devises qui permet de revenir à la devise de départ avec un montant supérieur à celui initialement investi.
+
+Ce problème peut être modélisé comme la recherche d'un cycle de poids négatif dans un graphe où :
+*   Les **nœuds** sont les devises.
+*   Les **arêtes** représentent les opérations de change possibles.
+*   Le **poids** d'une arête allant de la devise A à la devise B, avec un taux de change `Taux(A,B)` (nombre d'unités de B pour une unité de A), est transformé en utilisant la fonction logarithme négatif : `poids(A,B) = -log(Taux(A,B))`.
+
+Si une séquence de changes `D1 -> D2 -> ... -> Dk -> D1` résulte en un produit des taux `Taux(D1,D2) * Taux(D2,D3) * ... * Taux(Dk,D1) > 1`, alors la somme des poids transformés `(-log(Taux(D1,D2))) + ... + (-log(Taux(Dk,D1)))` sera inférieure à 0. Bellman-Ford peut détecter un tel cycle.
+
+### Configuration de l'Exemple
+
+**Devises considérées :**
+*   EUR (Euro)
+*   USD (Dollar Américain)
+*   JPY (Yen Japonais)
+
+**Taux de Change Fictifs :**
+Nous allons utiliser les taux suivants, conçus pour créer une opportunité d'arbitrage :
+*   EUR vers USD (`EUR/USD`) : 1.10 (1 EUR = 1.10 USD)
+*   USD vers JPY (`USD/JPY`) : 130.0 (1 USD = 130 JPY)
+*   JPY vers EUR (`JPY/EUR`) : 0.0070 (1 JPY = 0.0070 EUR)
+
+Vérifions l'opportunité d'arbitrage pour le cycle EUR -> USD -> JPY -> EUR :
+Si on part avec 1 EUR :
+1.  EUR -> USD : 1 EUR * 1.10 = 1.10 USD
+2.  USD -> JPY : 1.10 USD * 130.0 = 143 JPY
+3.  JPY -> EUR : 143 JPY * 0.0070 = 1.001 EUR
+
+Puisque 1.001 EUR > 1 EUR, il y a une opportunité d'arbitrage. Le produit des taux est `1.10 * 130.0 * 0.0070 = 1.001`.
+
+### Implémentation de la Détection d'Arbitrage
+
+`[DÉBUT CODE CONSTRUCTION GRAPHE D'ARBITRAGE]`
+```pseudocode
+// Pseudocode ou code Python pour la construction du graphe :
+
+// import math // Nécessaire pour math.log
+
+// Devises = ["EUR", "USD", "JPY"]
+// Taux = {
+//     ("EUR", "USD"): 1.10,
+//     ("USD", "JPY"): 130.0,
+//     ("JPY", "EUR"): 0.0070,
+//     // Optionnel: ajouter les taux inverses pour un graphe plus complet
+//     // ("USD", "EUR"): 1 / 1.10,
+//     // ("JPY", "USD"): 1 / 130.0,
+//     // ("EUR", "JPY"): 1 / 0.0070 // Attention, cela pourrait créer d'autres cycles
+// }
+
+// fonction construire_graphe_arbitrage(devises, taux_changes):
+//     liste_aretes = []
+//     liste_sommets = devises
+
+//     pour (devise_depart, devise_arrivee), taux in taux_changes.items():
+//         poids = -math.log(taux)
+//         liste_aretes.append( (devise_depart, devise_arrivee, poids) )
+
+//     retourner liste_sommets, liste_aretes
+
+// sommets, aretes_ponderees = construire_graphe_arbitrage(Devises, Taux)
+```
+`[FIN CODE CONSTRUCTION GRAPHE D'ARBITRAGE]`
+
+`[DÉBUT CODE APPEL BELLMAN-FORD POUR ARBITRAGE]`
+```pseudocode
+// Pseudocode ou code Python pour l'appel à Bellman-Ford :
+
+// // Supposons une fonction BellmanFord existante qui retourne (distances, predecesseurs, message_cycle)
+// // où message_cycle est non nul si un cycle négatif est détecté.
+// // BellmanFord(liste_sommets, liste_aretes, source_arbitraire)
+
+// // Choisir une source arbitraire, par exemple la première devise
+// source_pour_bellmanford = sommets[0] // "EUR"
+
+// (distances, predecesseurs, message_cycle) = BellmanFord(
+//                                                 sommets,
+//                                                 aretes_ponderees,
+//                                                 source_pour_bellmanford
+//                                             )
+
+// si message_cycle contient "Cycle de poids négatif détecté":
+//     afficher "Opportunité d'arbitrage détectée !"
+//     // Une logique supplémentaire serait nécessaire pour reconstruire le cycle
+//     // à partir des prédécesseurs ou en marquant les nœuds lors de la détection.
+//     // Par exemple, en partant du nœud 'v' dont la distance a été réduite lors de la V-ième passe,
+//     // remonter les prédécesseurs jusqu'à retrouver 'v' ou un nœud déjà visité dans ce parcours.
+//     afficher "Cycle (exemple basé sur nos taux): EUR -> USD -> JPY -> EUR" // Ceci serait le résultat de la reconstruction
+// sinon:
+//     afficher "Aucune opportunité d'arbitrage simple détectée."
+
+```
+`[FIN CODE APPEL BELLMAN-FORD POUR ARBITRAGE]`
+
+### Résultats et Interprétation
+
+L'algorithme de Bellman-Ford, appliqué au graphe construit avec les poids `-log(taux)`, va analyser les chemins.
+*   Si l'algorithme détecte un cycle dont la somme des poids (`-log(Taux)`) est négative, cela signifie que le produit des taux de change originaux sur ce cycle est supérieur à 1. Une opportunité d'arbitrage existe.
+*   Le cycle lui-même (la séquence de devises à échanger) peut être reconstitué en examinant les prédécesseurs des nœuds impliqués dans la détection du cycle négatif lors de la `|V|`-ième itération de Bellman-Ford.
+
+`[DÉBUT SORTIE PROGRAMME D'ARBITRAGE]`
+```
+// Exemple de sortie attendue du programme (basé sur les taux fournis) :
+
+Taux de change considérés :
+EUR -> USD : 1.10
+USD -> JPY : 130.0
+JPY -> EUR : 0.0070
+
+Poids transformés (-log(taux)) :
+EUR -> USD : -log(1.10) = -0.0953
+USD -> JPY : -log(130.0) = -4.8675
+JPY -> EUR : -log(0.0070) = 4.9618
+
+(L'algorithme de Bellman-Ford est exécuté...)
+
+Opportunité d'arbitrage détectée !
+Cycle d'arbitrage identifié : EUR -> USD -> JPY -> EUR
+Somme des poids sur le cycle : -0.0953 - 4.8675 + 4.9618 = -0.001
+(Cette somme est négative, confirmant l'opportunité)
+
+Vérification par produit des taux sur le cycle :
+1.10 * 130.0 * 0.0070 = 1.001
+Profit attendu : (1.001 - 1.0) / 1.0 = 0.001, soit 0.1% par cycle (avant frais de transaction).
+```
+`[FIN SORTIE PROGRAMME D'ARBITRAGE]`
+
+### Conclusion de l'Exemple
+
+Cet exemple démontre la puissance de l'algorithme de Bellman-Ford pour résoudre des problèmes qui ne semblent pas être des problèmes de plus court chemin à première vue. En transformant intelligemment les données du problème (ici, les taux de change), Bellman-Ford devient un outil efficace pour identifier des structures spécifiques (les cycles de profit) dans des graphes financiers. Sa capacité à gérer les poids négatifs et à détecter les cycles négatifs est ici non seulement une fonctionnalité, mais le cœur même de la solution.

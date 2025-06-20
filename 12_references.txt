@@ -1,0 +1,30 @@
+# 12. Références et Lectures Complémentaires
+
+Cette section propose une liste indicative d'ouvrages et de ressources qui permettront au lecteur d'approfondir sa compréhension de l'algorithme de Bellman-Ford, des algorithmes de graphes en général, ainsi que de leurs applications.
+
+Les références ci-dessous sont présentées sous forme d'une liste numérotée. Dans un document formel, un style de citation bibliographique standard (tel que APA, IEEE, etc.) serait adopté pour une présentation rigoureuse.
+
+---
+
+`[1] Cormen, Thomas H., Leiserson, Charles E., Rivest, Ronald L., et Stein, Clifford. *Introduction to Algorithms*. MIT Press. (Préciser le numéro de l'édition, par exemple, 3ème ou 4ème édition).`
+    *   *Commentaire : Un ouvrage de référence fondamental en algorithmique, couvrant en détail les algorithmes de graphes, y compris Bellman-Ford.*
+
+`[2] Sedgewick, Robert, et Wayne, Kevin. *Algorithms*. Addison-Wesley Professional. (Préciser le numéro de l'édition, par exemple, 4ème édition).`
+    *   *Commentaire : Un autre texte classique offrant une excellente couverture des algorithmes et structures de données, avec des explications claires et des exemples pratiques.*
+
+`[3] Kleinberg, Jon, et Tardos, Éva. *Algorithm Design*. Addison-Wesley. (Préciser l'année ou l'édition).`
+    *   *Commentaire : Ce livre aborde la conception d'algorithmes sous un angle souvent motivé par des problèmes concrets, et traite des algorithmes de plus court chemin.*
+
+`[4] [Nom de l'auteur/Organisation]. "[Titre de l'article ou de la page web spécifique sur Bellman-Ford ou une de ses applications]". *[Nom de la revue, du site web ou de la conférence]*. [Date de publication ou de consultation]. [URL si applicable].`
+    *   *Commentaire : Placeholder pour un article de recherche spécifique, un post de blog technique détaillé, ou une page de documentation approfondie. Par exemple, un article analysant la performance de Bellman-Ford dans les réseaux à grande échelle, ou une explication détaillée de son usage dans un protocole de routage spécifique.*
+
+`[5] Documentation officielle de la bibliothèque NetworkX (ou d'une autre bibliothèque de graphes pertinente comme Boost Graph Library pour C++, JGraphT pour Java). Section relative à l'algorithme de Bellman-Ford.`
+    *   *Commentaire : Les documentations des bibliothèques de programmation scientifique ou de manipulation de graphes fournissent souvent des informations sur l'implémentation de l'algorithme, ses paramètres, et parfois des exemples d'utilisation. Par exemple, la documentation de NetworkX explique comment utiliser sa fonction `bellman_ford_path`.*
+
+`[6] Schrijver, Alexander. *Combinatorial Optimization: Polyhedra and Efficiency*. Springer. (Préciser l'année).`
+    *   *Commentaire : Pour une exploration beaucoup plus avancée et mathématique des algorithmes d'optimisation combinatoire, y compris les problèmes de plus court chemin et leurs connexions avec la programmation linéaire.*
+
+---
+
+**Note sur les Références Listées :**
+Les entrées ci-dessus sont principalement des placeholders et des exemples de types de ressources qui seraient pertinents pour un document sur l'algorithme de Bellman-Ford. Pour une version finale du document, ces placeholders devraient être remplacés par les sources exactes qui ont été consultées lors de la rédaction, ou par une sélection curated de lectures recommandées pour le public cible. Il est crucial de vérifier les éditions les plus récentes des ouvrages et de fournir des liens valides pour les ressources en ligne.
