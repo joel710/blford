@@ -1,0 +1,77 @@
+# 2. Explication de l'algorithme de Bellman-Ford
+
+L'algorithme de Bellman-Ford est une méthode permettant de calculer les plus courts chemins depuis un nœud source unique vers tous les autres nœuds d'un graphe pondéré. Sa particularité et son avantage majeur résident dans sa capacité à traiter des graphes comportant des arêtes avec des poids aussi bien positifs que négatifs.
+
+## 2.1. Présentation générale
+
+L'algorithme fonctionne en initialisant les distances de la source à tous les autres nœuds, puis en relâchant itérativement les estimations de ces distances jusqu'à ce que la solution optimale soit atteinte. Contrairement à l'algorithme de Dijkstra, qui choisit "gloutonnement" le prochain nœud à visiter, Bellman-Ford adopte une approche plus systématique en parcourant toutes les arêtes du graphe à plusieurs reprises.
+
+## 2.2. Initialisation
+
+Avant de commencer le processus itératif, l'algorithme procède à une initialisation des structures de données nécessaires :
+
+*   **Distances (`distance[v]`)**: Un tableau `distance` est utilisé pour stocker la meilleure estimation actuelle du coût du plus court chemin du nœud `source` au nœud `v`.
+    *   La distance du nœud `source` à lui-même est initialisée à 0 : `distance[source] := 0`.
+    *   Pour tous les autres nœuds `v` du graphe, la distance est initialisée à l'infini (`Infini`) : `distance[v] := Infini`. Cela signifie qu'au départ, aucun chemin n'est connu vers ces nœuds.
+
+*   **Prédécesseurs (`predecesseur[v]`)**: Un tableau `predecesseur` est utilisé pour reconstruire les plus courts chemins une fois l'algorithme terminé. `predecesseur[v]` stocke le nœud qui précède `v` dans le plus court chemin actuellement connu depuis la `source`.
+    *   Pour tous les nœuds `v`, y compris la `source`, le prédécesseur est initialisé à une valeur nulle ou indéfinie (`Nul`).
+
+## 2.3. Processus itératif (Relaxation)
+
+Le cœur de l'algorithme de Bellman-Ford repose sur le concept de **relaxation** des arêtes. Ce processus est répété plusieurs fois.
+
+Une **relaxation** d'une arête `(u, v)` ayant un poids `p` consiste à vérifier si le chemin actuel vers `v` peut être amélioré en passant par `u`. Plus formellement :
+Si `distance[u] + p < distance[v]`, cela signifie qu'un chemin plus court vers `v` a été trouvé en passant par `u`.
+Dans ce cas, nous mettons à jour :
+*   `distance[v] := distance[u] + p` (la nouvelle distance plus courte vers `v`)
+*   `predecesseur[v] := u` (le nœud `u` devient le prédécesseur de `v` dans ce chemin plus court)
+
+L'algorithme de Bellman-Ford effectue cette opération de relaxation pour **toutes les arêtes du graphe**. Cette passe complète sur toutes les arêtes est répétée `|V| - 1` fois, où `|V|` est le nombre de sommets (nœuds) dans le graphe.
+
+**Pourquoi `|V| - 1` itérations ?**
+En l'absence de cycles de poids négatif accessibles depuis la source, le plus court chemin simple d'un nœud source à n'importe quel autre nœud ne peut contenir plus de `|V| - 1` arêtes. Un chemin simple est un chemin qui ne repasse pas par un même sommet. Si un chemin simple contient `k` arêtes, il est composé de `k+1` sommets. Le chemin simple le plus long possible dans un graphe à `|V|` sommets contient donc `|V|` sommets et, par conséquent, `|V| - 1` arêtes.
+Après la première itération, l'algorithme garantit d'avoir trouvé tous les plus courts chemins utilisant au plus une arête. Après la deuxième itération, il garantit d'avoir trouvé tous les plus courts chemins utilisant au plus deux arêtes, et ainsi de suite. Par conséquent, après `|V| - 1` itérations, l'algorithme garantit d'avoir trouvé tous les plus courts chemins simples possibles.
+
+## 2.4. Pseudocode
+
+Voici un pseudocode décrivant l'algorithme de Bellman-Ford pour calculer les plus courts chemins :
+
+```pseudocode
+fonction BellmanFord(Graphe, source):
+    // Graphe contient les sommets V et les arêtes E
+    // Graphe.V est l'ensemble des sommets, Graphe.E est l'ensemble des arêtes
+
+    // Étape 1 : Initialisation
+    pour chaque sommet v dans Graphe.V:
+        distance[v] := Infini      // Estimation initiale de la distance
+        predecesseur[v] := Nul    // Prédécesseur initial pour reconstruire le chemin
+
+    distance[source] := 0           // La distance de la source à elle-même est 0
+
+    // Étape 2 : Répéter |V| - 1 fois (Relaxation des arêtes)
+    // |V| est le nombre de sommets dans le graphe
+    pour i de 1 à |V| - 1:
+        // Pour chaque arête (u, v) avec poids p dans Graphe.E
+        // u est le sommet de départ de l'arête, v est le sommet d'arrivée
+        pour chaque arête (u, v) de poids p appartenant à Graphe.E:
+            // Si un chemin plus court vers v est trouvé en passant par u
+            si distance[u] + p < distance[v]:
+                distance[v] := distance[u] + p  // Mettre à jour la distance de v
+                predecesseur[v] := u            // Mettre à jour le prédécesseur de v
+
+    // Étape 3 : Vérification des cycles de poids négatif
+    // Cette partie sera détaillée dans la section suivante.
+    // Pour l'instant, nous supposons qu'il n'y a pas de tels cycles ou nous les ignorons.
+
+    // Retourner les distances et les prédécesseurs calculés
+    retourner distance, predecesseur
+```
+
+## 2.5. Convergence et garantie
+
+La convergence de l'algorithme est assurée par le nombre d'itérations.
+*   Après la 1ère itération complète sur toutes les arêtes, l'algorithme a trouvé tous les plus courts chemins dont la longueur (nombre d'arêtes) est au plus 1.
+*   Après la `k`-ième itération, l'algorithme a trouvé le plus court chemin de la source à chaque nœud `v` qui utilise au plus `k` arêtes.
+
+Par conséquent, après `|V| - 1` itérations, l'algorithme a exploré toutes les possibilités de chemins simples. Si le graphe ne contient aucun cycle de poids négatif accessible depuis la source, les valeurs `distance[v]` et `predecesseur[v]` stockent les coûts des plus courts chemins et les informations pour les reconstruire. La question de la détection des cycles de poids négatif, qui nécessite une étape supplémentaire après ces `|V| - 1` itérations, sera abordée dans la section suivante.

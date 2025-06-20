@@ -1,0 +1,27 @@
+# 1. Introduction aux algorithmes de plus court chemin
+
+En théorie des graphes, un problème de plus court chemin consiste à trouver un trajet entre deux nœuds (ou sommets) d'un graphe de telle manière que la somme des poids des arêtes constituant ce chemin soit minimale.
+
+## 1.1. Concepts de base des graphes
+
+Un **graphe** est une structure de données composée de :
+*   **Nœuds** (ou sommets) : Ce sont les entités fondamentales du graphe.
+*   **Arêtes** (ou arcs) : Ce sont les connexions entre les paires de nœuds. Une arête peut être **orientée** (allant d'un nœud A à un nœud B mais pas nécessairement de B à A) ou **non orientée** (la connexion fonctionne dans les deux sens).
+*   **Poids** : Chaque arête peut avoir une valeur numérique associée, appelée poids. Ce poids peut représenter diverses mesures telles qu'une distance, un coût, un temps, ou toute autre quantité que l'on souhaite minimiser ou maximiser.
+
+L'objectif principal d'un algorithme de plus court chemin est de déterminer, à partir d'un **nœud source** désigné, le chemin vers tous les autres nœuds du graphe (ou vers un **nœud cible** spécifique) de sorte que la somme totale des poids des arêtes empruntées soit la plus petite possible.
+
+## 1.2. Algorithmes courants pour le plus court chemin
+
+Plusieurs algorithmes ont été développés pour résoudre ce type de problème. Parmi les plus connus, on trouve :
+
+*   **L'algorithme de Dijkstra** : C'est l'un des algorithmes les plus populaires et efficaces pour trouver les plus courts chemins depuis une source unique. Son cas d'utilisation typique concerne les graphes où tous les **poids des arêtes sont non négatifs**.
+
+## 1.3. Positionnement de l'algorithme de Bellman-Ford
+
+L'algorithme de Bellman-Ford, qui est le sujet principal de ce document, offre une solution plus générale au problème du plus court chemin. Ses caractéristiques distinctives sont :
+
+*   **Gestion des poids d'arête négatifs** : Contrairement à l'algorithme de Dijkstra, Bellman-Ford est capable de fonctionner correctement même en présence d'arêtes ayant des poids négatifs. C'est un avantage crucial dans de nombreuses applications réelles où les coûts peuvent être négatifs (par exemple, des gains ou des subventions).
+*   **Détection des cycles de poids négatif** : Une autre capacité importante de l'algorithme de Bellman-Ford est sa faculté à détecter la présence de cycles de poids négatif accessibles depuis le nœud source. Un tel cycle implique qu'il n'existe pas de solution finie pour le plus court chemin, car on pourrait théoriquement parcourir ce cycle indéfiniment pour diminuer le coût du chemin.
+
+Ce document se concentrera sur l'explication détaillée, l'implémentation et les applications de l'algorithme de Bellman-Ford.

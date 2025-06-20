@@ -1,0 +1,163 @@
+# 9. Démonstrations Pratiques et Exemples de Code
+
+Cette section est dédiée à illustrer l'algorithme de Bellman-Ford par des exemples concrets de code, des visualisations et une application pratique.
+
+## 9.1. Exemple d'Implémentation de l'Algorithme Bellman-Ford
+
+Cette sous-section présentera un exemple de code source, par exemple en Python, pour une implémentation fonctionnelle de l'algorithme de Bellman-Ford.
+
+`[DÉBUT DE L'ESPACE RÉSERVÉ POUR LE CODE SOURCE DE L'IMPLÉMENTATION DE BELLMAN-FORD]`
+```
+// Le code Python (ou autre langage choisi) de la fonction Bellman-Ford serait inséré ici.
+// Cette implémentation devrait inclure :
+// - La représentation du graphe (par exemple, une liste d'arêtes ou une liste d'adjacence).
+// - La fonction principale BellmanFord(graphe, source).
+// - L'initialisation des tableaux de distances et de prédécesseurs.
+// - Les boucles de relaxation des arêtes (V-1 itérations).
+// - La boucle de détection des cycles de poids négatif (la V-ième itération).
+// - Le retour des distances et prédécesseurs, ou une indication de la présence d'un cycle négatif.
+```
+`[FIN DE L'ESPACE RÉSERVÉ POUR LE CODE SOURCE DE L'IMPLÉMENTATION DE BELLMAN-FORD]`
+
+`[DÉBUT DE L'ESPACE RÉSERVÉ POUR L'EXEMPLE D'UTILISATION ET LES CAPTURES D'ÉCRAN DE SORTIE]`
+```
+// Description détaillée d'un exemple de graphe (nœuds, arêtes, poids) qui sera utilisé
+// pour tester l'implémentation ci-dessus. Cet exemple pourrait être celui utilisé dans
+// la section "Exemple pas à pas" ou "Exemple avec cycle négatif".
+
+// Extrait de code montrant comment appeler la fonction BellmanFord implementée avec
+// le graphe exemple.
+// Par exemple:
+// graphe_test = {
+//   'sommets': ['S', 'A', 'B', 'C', 'D'],
+//   'aretes': [('S','A',4), ('S','B',2), ...], // (source, destination, poids)
+//   'source': 'S'
+// }
+// distances, predecesseurs = BellmanFord(graphe_test['sommets'], graphe_test['aretes'], graphe_test['source'])
+
+// Espace réservé pour une capture d'écran ou un bloc de texte formaté
+// montrant la sortie exacte du programme :
+// - Les distances calculées pour chaque nœud depuis la source.
+// - Le tableau des prédécesseurs.
+// - Si un cycle négatif est testé et détecté, le message approprié.
+
+// Exemple de sortie attendue (texte):
+// Distances depuis S:
+// S: 0
+// A: 1
+// B: 2
+// C: 4
+// D: 2
+// Prédécesseurs:
+// S: Nul
+// A: B
+// B: S
+// C: A
+// D: C
+//
+// Ou, en cas de cycle négatif:
+// "Un cycle de poids négatif a été détecté dans le graphe."
+```
+`[FIN DE L'ESPACE RÉSERVÉ POUR L'EXEMPLE D'UTILISATION ET LES CAPTURES D'ÉCRAN DE SORTIE]`
+
+## 9.2. Visualisation du Fonctionnement de Bellman-Ford
+
+Visualiser l'algorithme de Bellman-Ford peut grandement aider à comprendre son fonctionnement interne, notamment la manière dont les estimations de distance sont progressivement mises à jour et comment les cycles négatifs sont éventuellement détectés.
+
+Cette section décrira un moyen de visualiser l'algorithme, par exemple en montrant l'évolution du graphe et des tables de distances à chaque étape clé.
+
+`[DÉBUT DE L'ESPACE RÉSERVÉ POUR LA DESCRIPTION DE L'OUTIL/PROGRAMME DE VISUALISATION]`
+```
+// Description de l'approche ou de l'outil utilisé pour la visualisation.
+// Options possibles :
+// 1. Bibliothèque de Graphes : "Utilisation d'une bibliothèque de programmation comme NetworkX en Python,
+//    combinée avec Matplotlib ou Graphviz, pour générer des images statiques du graphe à différentes
+//    étapes de l'algorithme. Les nœuds pourraient changer de couleur en fonction de leur distance,
+//    et les arêtes relaxées pourraient être mises en évidence."
+// 2. Outil en Ligne/Logiciel Spécifique : "Démonstration à l'aide d'un outil en ligne interactif
+//    spécialisé dans la visualisation d'algorithmes de graphes (par exemple, [Nom de l'outil et lien si pertinent]).
+//    Ces outils permettent souvent de voir l'algorithme s'exécuter pas à pas."
+// 3. Animation GIF/Vidéo : "Création d'une animation (GIF ou courte vidéo) montrant l'évolution
+//    des distances et des chemins sur le graphe au fil des itérations."
+// Le choix dépendra des capacités et de la clarté souhaitée.
+```
+`[FIN DE L'ESPACE RÉSERVÉ POUR LA DESCRIPTION DE L'OUTIL/PROGRAMME DE VISUALISATION]`
+
+`[DÉBUT DE L'ESPACE RÉSERVÉ POUR LES CAPTURES D'ÉCRAN DE LA VISUALISATION]`
+```
+// Plusieurs images ou captures d'écran seraient insérées ici pour illustrer la visualisation.
+// Chaque capture devrait être accompagnée d'une légende expliquant ce qu'elle représente.
+
+// Exemple de séquence de captures d'écran :
+
+// Figure 9.2.1 : Graphe initial avant le début de l'algorithme.
+// (Capture d'écran du graphe avec les poids initiaux des arêtes et les distances à Infini)
+
+// Figure 9.2.2 : État du graphe et des distances après la première passe de relaxation.
+// (Capture d'écran montrant les premières mises à jour des distances, arêtes potentiellement colorées)
+
+// Figure 9.2.3 : État du graphe après plusieurs passes, montrant la convergence des distances.
+// (Capture d'écran)
+
+// Figure 9.2.4 : Graphe final avec les plus courts chemins mis en évidence (par exemple, par couleur ou épaisseur d'arête).
+// (Capture d'écran)
+
+// Figure 9.2.5 (Optionnel) : Visualisation de la détection d'un cycle de poids négatif.
+// (Capture d'écran montrant les arêtes du cycle mises en évidence et les distances qui pourraient continuer à diminuer).
+```
+`[FIN DE L'ESPACE RÉSERVÉ POUR LES CAPTURES D'ÉCRAN DE LA VISUALISATION]`
+
+## 9.3. Exemple d'Application : Détection d'Arbitrage de Devises
+
+Cette section illustrera l'application de l'algorithme de Bellman-Ford à un problème concret : la détection d'opportunités d'arbitrage sur le marché des changes. Comme expliqué précédemment, cela implique de trouver des cycles de poids négatif dans un graphe où les nœuds sont des devises et les poids des arêtes sont dérivés des taux de change (`-log(taux)`).
+
+`[DÉBUT DE L'ESPACE RÉSERVÉ POUR LE CODE DE L'APPLICATION D'ARBITRAGE]`
+```
+// Code source (par exemple, en Python) pour l'application de détection d'arbitrage.
+// Ce code devrait inclure :
+// 1. Une structure de données pour représenter les taux de change (par exemple, un dictionnaire ou une matrice).
+//    Exemple de taux fictifs :
+//    taux_de_change = {
+//        ('USD', 'EUR'): 0.92, ('EUR', 'USD'): 1.08,
+//        ('USD', 'GBP'): 0.79, ('GBP', 'USD'): 1.26,
+//        ('EUR', 'GBP'): 0.85, ('GBP', 'EUR'): 1.17,
+//        // Ajouter d'autres devises et taux pour créer une opportunité d'arbitrage
+//        ('JPY', 'USD'): 0.0067, ('USD', 'JPY'): 150.0
+//    }
+// 2. Une fonction pour construire le graphe des devises :
+//    - Les nœuds sont les devises.
+//    - Les arêtes ont des poids calculés comme -log(taux_de_change(U,V)).
+// 3. L'appel à la fonction Bellman-Ford (préalablement définie ou importée) sur ce graphe.
+//    Il faut choisir un nœud source (n'importe quelle devise peut servir de source pour la détection de cycle).
+// 4. Une logique pour interpréter le résultat :
+//    - Si un cycle négatif est détecté, afficher "Opportunité d'arbitrage trouvée".
+//    - Essayer de reconstruire et d'afficher la séquence de devises formant le cycle d'arbitrage.
+//    - Calculer et afficher le profit potentiel en suivant ce cycle.
+```
+`[FIN DE L'ESPACE RÉSERVÉ POUR LE CODE DE L'APPLICATION D'ARBITRAGE]`
+
+`[DÉBUT DE L'ESPACE RÉSERVÉ POUR LES RÉSULTATS/CAPTURES D'ÉCRAN DE L'APPLICATION D'ARBITRAGE]`
+```
+// Espace pour une capture d'écran de la console ou un bloc de texte formaté
+// montrant la sortie du programme d'application d'arbitrage.
+
+// Exemple de sortie attendue (texte) :
+
+// Taux de change considérés :
+// USD -> EUR : 0.92
+// EUR -> GBP : 0.85
+// GBP -> USD : 1.26  (Ce cycle USD->EUR->GBP->USD donne 0.92*0.85*1.26 = 0.98532, pas d'arbitrage)
+// ... (afficher d'autres taux, y compris ceux formant un arbitrage)
+
+// Opportunité d'arbitrage détectée !
+// Séquence d'arbitrage : USD -> JPY -> [Autre Devise si besoin] -> USD
+// Exemple : 1 USD -> 150 JPY
+//          150 JPY -> 1.5 EUR (taux JPY/EUR fictif)
+//          1.5 EUR -> 1.05 USD (taux EUR/USD fictif)
+// Profit : Commencer avec 1 USD, finir avec 1.05 USD.
+// (Les valeurs et la séquence dépendront des taux fictifs utilisés dans le code pour créer un cycle)
+
+// Si aucun arbitrage n'est trouvé avec les taux donnés :
+// "Aucune opportunité d'arbitrage simple détectée avec les taux fournis."
+```
+`[FIN DE L'ESPACE RÉSERVÉ POUR LES RÉSULTATS/CAPTURES D'ÉCRAN DE L'APPLICATION D'ARBITRAGE]`

@@ -1,0 +1,70 @@
+# 4. Analyse de Complexité de l'Algorithme de Bellman-Ford
+
+L'efficacité d'un algorithme est généralement mesurée par sa complexité temporelle (temps d'exécution) et sa complexité spatiale (mémoire utilisée). Analysons ces aspects pour l'algorithme de Bellman-Ford.
+
+## 4.1. Complexité Temporelle
+
+La complexité temporelle de l'algorithme de Bellman-Ford peut être décomposée en fonction de ses principales étapes :
+
+1.  **Initialisation** :
+    *   L'algorithme initialise un tableau `distance` pour chaque sommet à l'infini (sauf pour la source à 0) et un tableau `predecesseur` pour chaque sommet à Nul.
+    *   Ces deux opérations parcourent l'ensemble des `|V|` sommets une fois.
+    *   La complexité de cette étape est donc de **O(|V|)**.
+
+2.  **Itérations de Relaxation** :
+    *   Le cœur de l'algorithme consiste en une boucle principale qui s'exécute `|V| - 1` fois.
+    *   À l'intérieur de cette boucle principale, une autre boucle parcourt toutes les arêtes du graphe. Soit `|E|` le nombre d'arêtes.
+    *   Pour chaque arête `(u, v)`, l'opération de relaxation (vérifier si `distance[u] + poids(u,v) < distance[v]` et effectuer la mise à jour) prend un temps constant, **O(1)**.
+    *   Par conséquent, une seule itération de la boucle principale (qui parcourt toutes les arêtes) prend **O(|E|)** temps.
+    *   Comme cette boucle principale est répétée `|V| - 1` fois, la complexité totale de cette phase est `(|V| - 1) * O(|E|) =` **O(|V| * |E|)**.
+
+3.  **Détection des Cycles de Poids Négatif** :
+    *   Cette étape optionnelle (mais souvent cruciale) consiste à effectuer une passe supplémentaire sur toutes les arêtes pour vérifier si une relaxation est encore possible.
+    *   Elle parcourt donc toutes les `|E|` arêtes une fois de plus, effectuant une opération en O(1) pour chacune.
+    *   La complexité de cette phase est donc de **O(|E|)**.
+
+**Complexité Globale :**
+En additionnant les complexités de ces étapes, la complexité temporelle dominante est celle des itérations de relaxation.
+`O(|V|) + O(|V| * |E|) + O(|E|) = O(|V| * |E|)`
+
+Ainsi, la complexité temporelle globale de l'algorithme de Bellman-Ford est **O(|V|E|)**.
+
+**Discussion des Cas Extrêmes :**
+*   **Pire Cas (Graphe Dense)** : Dans un graphe dense, le nombre d'arêtes `|E|` peut être de l'ordre de `O(|V|^2)` (presque tous les sommets sont connectés à tous les autres). Dans ce cas, la complexité de Bellman-Ford devient `O(|V| * |V|^2) =` **O(|V|^3)**.
+*   **Meilleur Cas / Cas Typique (Graphe Creux)** : Dans un graphe creux, le nombre d'arêtes `|E|` est de l'ordre de `O(|V|)` (par exemple, chaque sommet n'est connecté qu'à un petit nombre constant d'autres sommets). Dans ce cas, la complexité de Bellman-Ford devient `O(|V| * |V|) =` **O(|V|^2)**.
+
+## 4.2. Complexité Spatiale
+
+La complexité spatiale de l'algorithme de Bellman-Ford dépend des structures de données utilisées pour stocker les informations :
+
+1.  **Stockage des Distances** :
+    *   Un tableau `distance` est nécessaire pour stocker la distance estimée de la source à chaque sommet. Ce tableau a une taille de `|V|`.
+    *   Espace requis : **O(|V|)**.
+
+2.  **Stockage des Prédécesseurs** :
+    *   Un tableau `predecesseur` est nécessaire pour stocker le prédécesseur de chaque sommet dans le chemin le plus court. Ce tableau a également une taille de `|V|`.
+    *   Espace requis : **O(|V|)**.
+
+3.  **Stockage du Graphe** :
+    *   L'algorithme a besoin d'une représentation du graphe lui-même. Si le graphe est stocké en utilisant une **liste d'adjacence** (la méthode la plus courante pour les graphes creux), l'espace requis pour le graphe est **O(|V| + |E|)**.
+    *   Si une **matrice d'adjacence** est utilisée (plus courante pour les graphes denses), l'espace requis est **O(|V|^2)**.
+
+L'espace auxiliaire utilisé par l'algorithme lui-même, en excluant la représentation du graphe, est déterminé par les tableaux `distance` et `predecesseur`.
+Par conséquent, la complexité spatiale auxiliaire de l'algorithme de Bellman-Ford est **O(|V|)**.
+
+## 4.3. Comparaison avec l'Algorithme de Dijkstra
+
+Il est instructif de comparer Bellman-Ford avec l'algorithme de Dijkstra, un autre algorithme populaire pour les plus courts chemins.
+
+*   **Complexité Temporelle de Dijkstra** :
+    *   Avec une implémentation utilisant un **tas binaire (min-priority queue)**, la complexité de Dijkstra est typiquement **O((|E| + |V|) log |V|)** ou souvent simplifié en **O(|E| log |V|)** si `|E| > |V|`.
+    *   Avec un **tas de Fibonacci**, elle peut être améliorée à **O(|E| + |V| log |V|)**.
+
+*   **Performance Relative** :
+    *   En général, l'algorithme de Bellman-Ford avec sa complexité de **O(|V|E|)** est plus lent que Dijkstra, surtout pour les graphes où `log |V|` est significativement plus petit que `|V|`. Par exemple, dans un graphe creux, Dijkstra serait O(|V| log |V|) contre O(|V|^2) pour Bellman-Ford. Dans un graphe dense, Dijkstra serait O(|V|^2 log |V|) contre O(|V|^3) pour Bellman-Ford.
+
+*   **Cas d'Usage** :
+    *   L'avantage crucial de **Bellman-Ford** est sa capacité à **gérer les arêtes de poids négatif** et à **détecter les cycles de poids négatif**.
+    *   **Dijkstra** est plus rapide mais ne fonctionne correctement que si **tous les poids des arêtes sont non négatifs**. S'il est utilisé sur un graphe avec des poids négatifs, il peut produire des résultats incorrects.
+
+En conclusion, si le graphe contient (ou pourrait contenir) des arêtes de poids négatif, Bellman-Ford est le choix approprié malgré sa complexité temporelle plus élevée. Si l'on est certain que tous les poids sont non négatifs, Dijkstra est généralement préféré pour sa meilleure performance.

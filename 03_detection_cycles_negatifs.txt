@@ -1,0 +1,70 @@
+# 3. Détection des cycles de poids négatif
+
+Une caractéristique essentielle de l'algorithme de Bellman-Ford, qui le distingue notamment de l'algorithme de Dijkstra, est sa capacité à détecter la présence de cycles de poids négatif au sein d'un graphe.
+
+## 3.1. Définition et Problématique des Cycles de Poids Négatif
+
+Un **cycle de poids négatif** est un chemin dans le graphe qui commence et se termine au même nœud, et dont la somme des poids des arêtes qui le composent est strictement négative.
+
+La présence d'un tel cycle accessible depuis le nœud source pose un problème fondamental pour la notion de "plus court chemin". Si un chemin vers un nœud `x` peut emprunter un cycle de poids négatif, cela signifie que l'on peut théoriquement parcourir ce cycle un nombre infini de fois, diminuant le coût total du chemin à chaque passage. En conséquence, le coût du chemin vers `x` (et vers tous les nœuds atteignables depuis ce cycle) pourrait tendre vers moins l'infini (`-Infini`). Dans de telles situations, le concept de "plus court chemin" tel que défini habituellement (une valeur finie minimale) devient invalide pour ces nœuds.
+
+Par exemple, si pour aller de `A` à `B`, on peut passer par un cycle `C1 -> C2 -> C3 -> C1` dont la somme des poids est `-5`, on pourrait réduire le coût du chemin `A -> B` indéfiniment.
+
+## 3.2. Méthode de Détection par Bellman-Ford
+
+L'algorithme de Bellman-Ford, après avoir effectué ses `|V|-1` itérations principales (où `|V|` est le nombre de sommets), intègre une étape supplémentaire spécifiquement pour détecter ces cycles.
+
+Le principe est le suivant :
+Comme nous l'avons vu, après `|V|-1` itérations, toutes les distances des plus courts chemins simples (sans cycle) sont censées avoir été trouvées. Si une **`|V|`-ième passe (ou une passe supplémentaire après les `|V|-1` itérations initiales) sur toutes les arêtes du graphe permet encore de "relâcher" une arête**, c'est-à-dire d'améliorer la distance estimée vers un nœud, alors cela indique qu'un cycle de poids négatif est présent et accessible depuis la source. En effet, si tous les plus courts chemins simples ont été trouvés, aucune distance ne devrait pouvoir être réduite davantage, à moins qu'un cycle de poids négatif ne permette cette réduction "infinie".
+
+Voici comment cette phase de détection peut être ajoutée au pseudocode précédent :
+
+```pseudocode
+fonction BellmanFordAvecDetectionCycle(Graphe, source):
+    // Graphe contient les sommets V et les arêtes E
+    // Graphe.V est l'ensemble des sommets, Graphe.E est l'ensemble des arêtes
+
+    // Étape 1 : Initialisation (identique à la section précédente)
+    pour chaque sommet v dans Graphe.V:
+        distance[v] := Infini
+        predecesseur[v] := Nul
+    distance[source] := 0
+
+    // Étape 2 : Répéter |V| - 1 fois (Relaxation des arêtes)
+    pour i de 1 à |V| - 1:
+        pour chaque arête (u, v) de poids p appartenant à Graphe.E:
+            si distance[u] != Infini et distance[u] + p < distance[v]: // Ajout de la vérification distance[u] != Infini
+                distance[v] := distance[u] + p
+                predecesseur[v] := u
+
+    // Étape 3 : Détection des cycles de poids négatif
+    // Effectuer une passe supplémentaire sur toutes les arêtes
+    pour chaque arête (u, v) de poids p appartenant à Graphe.E:
+        // Si une distance peut encore être réduite, un cycle négatif existe
+        si distance[u] != Infini et distance[u] + p < distance[v]:
+            // Un cycle de poids négatif a été détecté.
+            // Le chemin vers 'v' (et potentiellement d'autres nœuds accessibles depuis ce cycle)
+            // peut être réduit indéfiniment.
+            retourner "Cycle de poids négatif détecté"
+            // Alternativement, on pourrait marquer les nœuds affectés ou retourner une structure
+            // de données indiquant la présence et potentiellement la localisation du cycle.
+
+    // Si aucun cycle de poids négatif n'est détecté après la |V|-ième passe implicite (boucle ci-dessus)
+    retourner distance, predecesseur
+```
+*Note : La condition `distance[u] != Infini` est importante pour s'assurer que la relaxation est basée sur un chemin existant depuis la source.*
+
+## 3.3. Implications et Actions Possibles
+
+La détection d'un cycle de poids négatif accessible depuis la source a des implications importantes :
+
+*   **Fiabilité des distances** : Les valeurs de `distance` calculées pour les nœuds qui font partie du cycle ou qui sont atteignables à partir de celui-ci ne représentent pas des plus courts chemins finis. Elles pourraient continuer à diminuer si l'algorithme poursuivait ses itérations à travers le cycle.
+*   **Validité des chemins** : Les chemins vers ces nœuds, tels que reconstruits via le tableau `predecesseur`, ne sont pas des "plus courts chemins" au sens strict si un cycle négatif est impliqué.
+
+Face à la détection d'un cycle de poids négatif, plusieurs actions sont possibles selon le contexte de l'application :
+
+1.  **Signaler l'erreur** : L'action la plus simple et la plus courante est de terminer l'algorithme et de signaler qu'un cycle de poids négatif a été trouvé, rendant le calcul classique des plus courts chemins impossible pour certains nœuds.
+2.  **Identifier les nœuds affectés** : Une tâche plus complexe consiste à identifier précisément quels nœuds font partie du cycle ou sont rendus "infiniment négatifs" par celui-ci. Cela peut nécessiter des étapes supplémentaires, comme remonter les prédécesseurs à partir du nœud `v` dont la distance a été réduite lors de la phase de détection, ou effectuer un parcours (par exemple, un DFS ou BFS) à partir des nœuds identifiés comme faisant partie d'un cycle pour marquer tous les nœuds atteignables. Les distances vers ces nœuds peuvent alors être explicitement mises à `-Infini`.
+3.  **Utilisation spécifique de la détection** : Dans certains domaines, la détection d'un cycle de poids négatif n'est pas une erreur mais le résultat recherché. Par exemple, en finance, la détection de séquences de transactions de change formant un cycle de "poids" (taux de change combinés) négatif (en réalité, un produit des taux supérieur à 1 après conversion en additions de logarithmes) signale une opportunité d'arbitrage.
+
+En résumé, la capacité de Bellman-Ford à détecter ces cycles est une force, permettant soit de valider la non-existence de telles anomalies, soit de les identifier pour un traitement approprié.
