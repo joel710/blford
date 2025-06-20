@@ -1,0 +1,186 @@
+## 9.1. Comparaison Illustrée : Dijkstra vs Bellman-Ford face aux Poids Négatifs
+
+L'objectif de cette sous-section est de montrer de manière concrète, à travers des exemples de graphes spécifiques, comment les algorithmes de Dijkstra et de Bellman-Ford se comportent différemment, en particulier lorsqu'ils sont confrontés à des arêtes de poids négatif, des nœuds inatteignables, et des cycles de poids négatif.
+
+### Scénario 1 : Graphe avec Poids Négatifs (Pas de Cycle Négatif) et Nœud Inatteignable
+
+Considérons le graphe simple suivant :
+*   **Nœuds :** S, A, B, C, D
+*   **Arêtes et poids :**
+    *   (S, A, 1)
+    *   (S, C, 5)  // Un chemin direct vers C, plus coûteux que S->A->B->C
+    *   (A, B, -2) // Arête avec poids négatif
+    *   (B, C, 1)
+*   **Source :** S
+*   Le nœud D est présent dans le graphe mais n'a aucune arête entrante, il est donc inatteignable depuis S.
+
+#### Comportement de Dijkstra
+
+`[DÉBUT CODE DIJKSTRA - SCÉNARIO 1]`
+```pseudocode
+// Pseudocode pour l'algorithme de Dijkstra
+fonction Dijkstra(Graphe, source):
+    // Initialisation
+    pour chaque sommet v dans Graphe:
+        distance[v] = Infini
+        predecesseur[v] = Nul
+    distance[source] = 0
+
+    Q = ensemble de tous les sommets // File de priorité
+
+    tant que Q n'est pas vide:
+        u = sommet dans Q avec la plus petite distance[u]
+        retirer u de Q
+
+        pour chaque voisin v de u: // Seulement les voisins atteignables depuis u
+            alt = distance[u] + poids(u,v)
+            si alt < distance[v]:
+                distance[v] = alt
+                predecesseur[v] = u
+    retourner distance, predecesseur
+```
+`[FIN CODE DIJKSTRA - SCÉNARIO 1]`
+
+`[SORTIE DIJKSTRA - SCÉNARIO 1]`
+```
+// Distances attendues (peuvent varier selon l'implémentation de Dijkstra face aux poids négatifs) :
+// S = 0
+// A = 1
+// C = 2 (via S->A->B->C si Dijkstra traite incorrectement le poids négatif, ou 5 via S->C s'il ignore le chemin via B)
+// B = -1 (potentiellement, mais Dijkstra standard s'attend à ce que distance[u] soit final lorsque u est extrait)
+// D = Infini
+
+// Commentaire :
+// L'algorithme de Dijkstra standard n'est pas conçu pour gérer les poids d'arête négatifs.
+// Lorsque le nœud A (dist=1) est traité, la distance de B est mise à jour (1 + (-2) = -1).
+// Si B est ensuite extrait de la file de priorité avec dist[B]=-1 (ce qui peut arriver si la file le permet),
+// la distance de C sera mise à jour ( -1 + 1 = 0).
+// Cependant, la prémisse de Dijkstra est que lorsqu'un nœud est extrait de la file de priorité, sa distance
+// est considérée comme finale et la plus courte. Les poids négatifs violent cette prémisse.
+// Certaines implémentations pourraient produire des résultats incorrects ou se comporter de manière inattendue.
+// Le nœud D, étant inatteignable, aura correctement une distance de Infini.
+```
+`[FIN SORTIE DIJKSTRA - SCÉNARIO 1]`
+
+#### Comportement de Bellman-Ford
+
+`[DÉBUT CODE BELLMAN-FORD - SCÉNARIO 1]`
+```pseudocode
+// Pseudocode pour l'algorithme de Bellman-Ford (extrait de la section 8.5)
+fonction BellmanFord(liste_sommets, liste_aretes, source):
+    // Initialiser distance[] et predecesseur[]
+    distance[source] = 0
+
+    pour i de 1 à nombre_de_sommets - 1:
+        pour chaque arête (u, v, poids) dans liste_aretes:
+            si distance[u] != Infini ET distance[u] + poids < distance[v]:
+                distance[v] = distance[u] + poids
+                predecesseur[v] = u
+    // (Pas de détection de cycle ici pour simplifier, car pas de cycle négatif attendu)
+    retourner distance, predecesseur
+```
+`[FIN CODE BELLMAN-FORD - SCÉNARIO 1]`
+
+`[SORTIE BELLMAN-FORD - SCÉNARIO 1]`
+```
+// Distances attendues :
+// S = 0
+// A = 1   (via S->A)
+// B = -1  (via S->A->B)
+// C = 0   (via S->A->B->C : 1 + (-2) + 1 = 0)
+// D = Infini
+
+// Commentaire :
+// Bellman-Ford traite correctement l'arête de poids négatif (A,B,-2).
+// Après les itérations nécessaires :
+// Passe 1: dist(A)=1, dist(B)=Inf (si S,A avant A,B), dist(C)=5
+// Passe 2: dist(B)=-1 (via A), dist(C)=0 (via B) (si A,B avant B,C)
+// L'algorithme converge vers les distances correctes.
+// Le nœud D, étant inatteignable, conserve correctement sa distance à Infini.
+```
+`[FIN SORTIE BELLMAN-FORD - SCÉNARIO 1]`
+
+### Scénario 2 : Graphe avec Cycle de Poids Négatif
+
+Reprenons le graphe du Scénario 1 et modifions-le pour introduire un cycle de poids négatif.
+*   **Nœuds :** S, A, B, C
+*   **Arêtes et poids :**
+    *   (S, A, 1)
+    *   (A, B, -2)
+    *   (B, C, 1)
+    *   **(C, A, -1)** // Nouvelle arête qui crée le cycle A->B->C->A de poids (-2 + 1 - 1 = -2)
+*   **Source :** S
+*   (Le nœud D est omis ici pour se concentrer sur le cycle)
+
+#### Comportement de Dijkstra
+
+`[DÉBUT CODE DIJKSTRA - SCÉNARIO 2]`
+```
+// Il n'est pas pertinent de montrer le code de Dijkstra ici.
+// L'algorithme de Dijkstra n'est pas conçu pour détecter ou gérer les cycles de poids négatif.
+```
+`[FIN CODE DIJKSTRA - SCÉNARIO 2]`
+
+`[SORTIE DIJKSTRA - SCÉNARIO 2]`
+```
+// Sortie attendue :
+// L'algorithme de Dijkstra pourrait :
+// 1. Boucler indéfiniment si les distances continuent de diminuer à cause du cycle négatif
+//    et que les nœuds sont réinsérés dans la file de priorité.
+// 2. Se terminer avec des résultats incorrects pour les nœuds impliqués dans le cycle
+//    ou atteignables depuis celui-ci.
+// Il ne signalera PAS explicitement la présence du cycle de poids négatif.
+```
+`[FIN SORTIE DIJKSTRA - SCÉNARIO 2]`
+
+#### Comportement de Bellman-Ford
+
+`[DÉBUT CODE BELLMAN-FORD - SCÉNARIO 2]`
+```pseudocode
+// Pseudocode pour l'algorithme de Bellman-Ford avec détection de cycle (extrait de la section 8.5)
+fonction BellmanFordAvecDetectionCycle(liste_sommets, liste_aretes, source):
+    // Initialiser distance[] et predecesseur[]
+    distance[source] = 0
+
+    pour i de 1 à nombre_de_sommets - 1: // |V|-1 itérations
+        pour chaque arête (u, v, poids) dans liste_aretes:
+            si distance[u] != Infini ET distance[u] + poids < distance[v]:
+                distance[v] = distance[u] + poids
+                predecesseur[v] = u
+
+    // Détection de cycle négatif (la |V|-ième passe)
+    pour chaque arête (u, v, poids) dans liste_aretes:
+        si distance[u] != Infini ET distance[u] + poids < distance[v]:
+            retourner "Cycle de poids négatif détecté"
+
+    retourner distance, predecesseur
+```
+`[FIN CODE BELLMAN-FORD - SCÉNARIO 2]`
+
+`[SORTIE BELLMAN-FORD - SCÉNARIO 2]`
+```
+// Sortie attendue :
+// "Cycle de poids négatif détecté"
+
+// Commentaire :
+// Après les |V|-1 (ici, 3) premières passes, les distances pour A, B, C pourraient être, par exemple :
+// S=0, A=1, B=-1, C=0 (provenant de S->A->B->C).
+// Lors de la 4ème passe (la passe de détection) :
+// - Considérons l'arête (C,A,-1). distance[C] + (-1) = 0 - 1 = -1.
+// - Si l'ancienne distance[A] était 1 (ou même une valeur inférieure due à une itération précédente dans le cycle),
+//   et que -1 < ancienne_distance[A], alors une relaxation se produirait.
+//   Par exemple, si dist[A] était 1, il deviendrait -1.
+//   Si dist[A] était -2 (après un tour de cycle), il deviendrait -4 (via B->C->A->B), etc.
+// Le fait qu'une distance puisse encore être réduite lors de cette passe supplémentaire
+// indique la présence du cycle A->B->C->A de poids -2.
+// Bellman-Ford identifiera et signalera ce cycle.
+```
+`[FIN SORTIE BELLMAN-FORD - SCÉNARIO 2]`
+
+### Conclusion de la Comparaison
+
+Ces scénarios illustrent les différences fondamentales :
+*   **Dijkstra** est efficace pour les graphes avec des poids non-négatifs. Il est généralement plus rapide que Bellman-Ford dans ces conditions. Cependant, il peut produire des résultats incorrects ou échouer en présence de poids d'arête négatifs et ne détecte pas les cycles de poids négatif.
+*   **Bellman-Ford** gère correctement les poids d'arête négatifs et peut calculer les plus courts chemins tant qu'il n'y a pas de cycle de poids négatif. Son avantage majeur est sa capacité à détecter et à signaler de manière fiable la présence de tels cycles, ce qui est crucial dans de nombreuses applications. Il gère aussi correctement les nœuds inatteignables (distance restant à Infini). Sa robustesse se paie par une complexité temporelle plus élevée.
+
+Le choix entre Dijkstra et Bellman-Ford dépend donc essentiellement des caractéristiques du graphe (présence ou absence de poids négatifs, possibilité de cycles négatifs) et des exigences de l'application.
