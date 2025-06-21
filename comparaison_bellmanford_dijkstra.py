@@ -4,6 +4,12 @@ import random
 import time
 import math
 
+# Liste de noms de lieux pour la ville
+VILLE_LIEUX = [
+    "Gare", "École", "Hôpital", "Mairie", "Parc", "Musée", "Stade", "Marché", "Université", "Cinéma",
+    "Banque", "Supermarché", "Pharmacie", "Boulangerie", "Hôtel", "Piscine", "Théâtre", "Café", "Librairie", "Police"
+]
+
 # --- Algorithmes ---
 def bellman_ford(edges, n, source):
     distances = [float('inf')] * n
@@ -54,11 +60,12 @@ def dijkstra(edges, n, source):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Comparaison Bellman-Ford vs Dijkstra")
-        self.geometry("1000x700")
+        self.title("Comparaison Bellman-Ford vs Dijkstra - Cartographie de Ville")
+        self.geometry("1100x750")
         self.edges = []
         self.n = 0
         self.positions = {}
+        self.lieux = []
         self.last_path = []
         self.last_distances = None
         self.last_target = None
@@ -69,53 +76,68 @@ class App(tk.Tk):
         frame = ttk.Frame(self)
         frame.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
 
-        ttk.Label(frame, text="Nombre de sommets :").pack()
+        ttk.Label(frame, text="Nombre de lieux (sommets) :").pack()
         self.n_entry = ttk.Entry(frame)
-        self.n_entry.insert(0, "6")
+        self.n_entry.insert(0, "8")
         self.n_entry.pack()
 
-        ttk.Label(frame, text="Nombre d'arêtes :").pack()
+        ttk.Label(frame, text="Nombre de routes (arêtes) :").pack()
         self.m_entry = ttk.Entry(frame)
-        self.m_entry.insert(0, "10")
+        self.m_entry.insert(0, "14")
         self.m_entry.pack()
 
-        ttk.Label(frame, text="Sommet de départ :").pack()
+        ttk.Label(frame, text="Lieu de départ :").pack()
         self.source_entry = ttk.Entry(frame)
         self.source_entry.insert(0, "0")
         self.source_entry.pack()
 
-        ttk.Label(frame, text="Sommet d'arrivée :").pack()
+        ttk.Label(frame, text="Lieu d'arrivée :").pack()
         self.target_entry = ttk.Entry(frame)
         self.target_entry.insert(0, "1")
         self.target_entry.pack()
 
         self.negative_var = tk.BooleanVar()
-        ttk.Checkbutton(frame, text="Poids négatifs (Bellman-Ford seulement)", variable=self.negative_var).pack()
+        ttk.Checkbutton(frame, text="Routes à poids négatifs (Bellman-Ford seulement)", variable=self.negative_var).pack()
 
-        ttk.Button(frame, text="Générer un graphe", command=self.generate_graph).pack(pady=5)
+        ttk.Button(frame, text="Générer la carte", command=self.generate_graph).pack(pady=5)
         ttk.Button(frame, text="Comparer", command=self.compare_algorithms).pack(pady=5)
-        self.animate_button = ttk.Button(frame, text="Animer le chemin", command=self.animate_path, state=tk.DISABLED)
+        self.animate_button = ttk.Button(frame, text="Animer le trajet optimal", command=self.animate_path, state=tk.DISABLED)
         self.animate_button.pack(pady=5)
 
         self.result_text = tk.Text(frame, height=15, width=40)
         self.result_text.pack(pady=10)
 
         # Zone de dessin du graphe
-        self.canvas = tk.Canvas(self, width=600, height=600, bg="white")
+        self.canvas = tk.Canvas(self, width=750, height=700, bg="#f5f5dc")
         self.canvas.pack(side=tk.RIGHT, fill=tk.BOTH, expand=1)
 
     def generate_graph(self):
         try:
             n = int(self.n_entry.get())
             m = int(self.m_entry.get())
+            if n > len(VILLE_LIEUX):
+                messagebox.showerror("Erreur", f"Maximum {len(VILLE_LIEUX)} lieux supportés.")
+                return
             if m < n-1 or m > n*(n-1):
                 raise ValueError
         except ValueError:
             messagebox.showerror("Erreur", "Paramètres invalides.")
             return
         self.n = n
+        self.lieux = VILLE_LIEUX[:n]
         self.edges = []
         edges = set()
+        # Positions aléatoires façon plan de ville
+        self.positions = {}
+        taken = []
+        for i in range(n):
+            while True:
+                x = random.randint(80, 700)
+                y = random.randint(80, 650)
+                if all((abs(x-x2) > 60 or abs(y-y2) > 60) for (x2, y2) in taken):
+                    self.positions[i] = (x, y)
+                    taken.append((x, y))
+                    break
         # Générer un arbre couvrant pour assurer la connexité
         nodes = list(range(n))
         random.shuffle(nodes)
@@ -125,7 +147,7 @@ class App(tk.Tk):
             weight = random.randint(-10, 20) if self.negative_var.get() else random.randint(1, 20)
             self.edges.append((u, v, weight))
             edges.add((u, v))
-        # Ajouter des arêtes supplémentaires
+        # Ajouter des routes supplémentaires
         while len(self.edges) < m:
             u, v = random.sample(range(n), 2)
             if (u, v) not in edges:
@@ -133,44 +155,41 @@ class App(tk.Tk):
                 self.edges.append((u, v, weight))
                 edges.add((u, v))
         self.result_text.delete(1.0, tk.END)
-        self.result_text.insert(tk.END, "Graphe généré avec succès !\n")
+        self.result_text.insert(tk.END, "Carte de ville générée avec succès !\n")
         self.draw_graph()
 
     def draw_graph(self, distances=None):
         self.canvas.delete("all")
         n = self.n
-        r = 250
-        cx, cy = 300, 300
-        angle_step = 2 * math.pi / n if n > 0 else 0
-        self.positions = {}
-        for i in range(n):
-            angle = i * angle_step
-            x = cx + r * math.cos(angle)
-            y = cy + r * math.sin(angle)
-            self.positions[i] = (x, y)
-        # Dessiner les arêtes
+        # Dessiner les routes
         for u, v, w in self.edges:
             x1, y1 = self.positions[u]
             x2, y2 = self.positions[v]
-            self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST)
+            self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, width=3, fill="#888888")
             mx, my = (x1 + x2) / 2, (y1 + y2) / 2
-            self.canvas.create_text(mx, my, text=str(w), fill="blue")
-        # Dessiner les sommets
+            self.canvas.create_rectangle(mx-15, my-12, mx+15, my+12, fill="#fff8dc", outline="#888888")
+            self.canvas.create_text(mx, my, text=str(w), fill="#003366", font=("Arial", 10, "bold"))
+        # Dessiner les lieux
         for i in range(n):
             x, y = self.positions[i]
-            color = "lightblue"
+            color = "#b3e6b3"  # vert clair
             if distances is not None:
                 color = "#ffaaaa" if distances[i] == float('inf') else "#aaffaa"
-            self.canvas.create_oval(x-25, y-25, x+25, y+25, fill=color, outline="black")
-            label = f"{i}"
+            self.canvas.create_oval(x-28, y-28, x+28, y+28, fill=color, outline="#333333", width=3)
+            self.canvas.create_rectangle(x-32, y+30, x+32, y+60, fill="#f5f5dc", outline="#333333")
+            label = f"{self.lieux[i]}\n({i})"
+            self.canvas.create_text(x, y, text=label, font=("Arial", 11, "bold"), fill="#222222")
             if distances is not None:
                 d = distances[i]
-                label += f"\n{d if d != float('inf') else '∞'}"
-            self.canvas.create_text(x, y, text=label, font=("Arial", 12, "bold"))
+                dist_label = f"{d if d != float('inf') else '∞'}"
+                self.canvas.create_text(x, y+45, text=f"Dist: {dist_label}", font=("Arial", 10), fill="#003366")
+        # Légende
+        self.canvas.create_rectangle(10, 10, 220, 70, fill="#fff8dc", outline="#888888")
+        self.canvas.create_text(115, 30, text="Lieux = sommets\nRoutes = arêtes\nPoids = distance/temps", font=("Arial", 10))
 
     def compare_algorithms(self):
         if not self.edges or self.n == 0:
-            messagebox.showerror("Erreur", "Veuillez d'abord générer un graphe.")
+            messagebox.showerror("Erreur", "Veuillez d'abord générer la carte.")
             return
         try:
             source = int(self.source_entry.get())
@@ -180,7 +199,7 @@ class App(tk.Tk):
             if not (0 <= target < self.n):
                 raise ValueError
         except ValueError:
-            messagebox.showerror("Erreur", "Sommet de départ ou d'arrivée invalide.")
+            messagebox.showerror("Erreur", "Lieu de départ ou d'arrivée invalide.")
             return
         self.result_text.delete(1.0, tk.END)
         # Bellman-Ford
@@ -229,23 +248,23 @@ class App(tk.Tk):
         self.draw_graph(distances=self.last_distances)
         path = self.last_path
         for i in range(len(path)-1):
-            self.after(i*600, lambda i=i: self.highlight_edge(path[i], path[i+1]))
-            self.after(i*600, lambda i=i: self.highlight_node(path[i]))
-        self.after((len(path)-1)*600, lambda: self.highlight_node(path[-1]))
+            self.after(i*700, lambda i=i: self.highlight_edge(path[i], path[i+1]))
+            self.after(i*700, lambda i=i: self.highlight_node(path[i]))
+        self.after((len(path)-1)*700, lambda: self.highlight_node(path[-1]))
 
     def highlight_edge(self, u, v):
         x1, y1 = self.positions[u]
         x2, y2 = self.positions[v]
-        self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, width=4, fill="red", tags="anim")
+        self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, width=6, fill="#ff6600", tags="anim")
 
     def highlight_node(self, node):
         x, y = self.positions[node]
-        self.canvas.create_oval(x-25, y-25, x+25, y+25, fill="#ffff00", outline="red", width=4, tags="anim")
-        label = f"{node}"
+        self.canvas.create_oval(x-28, y-28, x+28, y+28, fill="#ffff00", outline="#ff6600", width=5, tags="anim")
+        label = f"{self.lieux[node]}\n({node})"
         if self.last_distances:
             d = self.last_distances[node]
             label += f"\n{d if d != float('inf') else '∞'}"
-        self.canvas.create_text(x, y, text=label, font=("Arial", 12, "bold"), tags="anim")
+        self.canvas.create_text(x, y, text=label, font=("Arial", 11, "bold"), tags="anim")
 
 if __name__ == "__main__":
     app = App()
